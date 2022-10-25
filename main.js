@@ -45,10 +45,18 @@ class Players extends Entity {
 
     }
 
-    respawn() {
+    respawn1() {
         if (isOutsideTop(this)) {
             player1 = new Players(new Position(150, 520), playerSpeed, 20, player1Color)
             player1life++
+            
+        }
+    } 
+
+    respawn2() {
+        if (isOutsideTop(this)) {
+            player2 = new Players(new Position(400, 520), playerSpeed, 20, player2Color)
+            player2life++
             
         }
     } 
@@ -119,12 +127,16 @@ function player1KeyDown(event) {
 
 function player2KeyDown(event) {
     if (event.repeat) return;
-
+      event.preventDefault();
     if (event.key === 'ArrowUp') {
+        event.preventDefault();
         player2.keys.up = true;
+       
 
-    } else if (event.key == 'ArrowDown' /* ||event.key === 'Down' */) {
+    } else if (event.key == 'ArrowDown') {
+        event.preventDefault();
         player2.keys.down = true;
+        
     }
 }
 function player1KeyUp(event) {
@@ -138,10 +150,14 @@ function player1KeyUp(event) {
 
 function player2KeyUp(event) {
     if (event.key == 'ArrowUp') {
+      
         player2.keys.up = false;
+     
 
     }  else if (event.key == 'ArrowDown') {
+        event.preventDefault();
         player2.keys.down = false;
+        
     }
 }
 
@@ -150,6 +166,7 @@ window.addEventListener('keydown', player2KeyDown);
 window.addEventListener('keyup', player1KeyUp);
 window.addEventListener('keyup', player2KeyUp);
 
+  
 
 let lastTick = Date.now();
 
@@ -163,11 +180,13 @@ function tick() {
 
     context.clearRect(0, 0, canvas.width, canvas.height);
 
-    player1.draw();
+  
     handlePlayerMovement1(player1, deltaTime);
     handlePlayerMovement2(player2, deltaTime);
+    player1.draw();
     player2.draw();
-    player1.respawn();
+    player1.respawn1();
+    player2.respawn2()
     displayPlayer1lives();
     displayPlayer2lives();
     //isCircleOutside(player1)
