@@ -10,7 +10,7 @@ export class Position {
 }
 
 export class Velocity {
-    constructor () {
+    constructor (dx, dy) {
         this.dx = dx;
         this.dy = dy;
     }

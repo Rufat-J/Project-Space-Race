@@ -1,17 +1,16 @@
 'use strict'; 
 
-import {canvas, context, Position, Keys} from "./components.js"
+import {canvas, context, Position, Keys, Velocity} from "./components.js"
 
 let frameCount = 10;
-let player1life = 0
-let player2life = 0
-let player1score = false;
-let player2score = false; 
+let player1Score = 0
+let player2Score = 0
+
 
 //Game Settings
 let playerSpeed = 200;
-let player1Color = 'red'
-let player2Color = 'blue'
+let player1Color = 'Fuchsia'
+let player2Color = 'DeepSkyBlue'
 
 
 
@@ -21,7 +20,8 @@ class Entity {
     }
 
     draw() {}
-    respawn() {}
+    respawn1() {}
+    respawn2() {}
 }
 
 
@@ -33,6 +33,8 @@ class Players extends Entity {
         this.radius = radius;
         this.color = color; 
         this.keys = new Keys();
+        this.image = new Image()
+        this.image.src = `rocket1.png`
     }
 
 
@@ -46,43 +48,94 @@ class Players extends Entity {
     }
 
     respawn1() {
-        if (isOutsideTop(this)) {
-            player1 = new Players(new Position(150, 520), playerSpeed, 20, player1Color)
-            player1life++
+        if (this.position.y < -20) {
+            player1 = new Players(new Position(150, 520), playerSpeed, 20, player1Color, this.image)
+            player1Score++
             
         }
     } 
 
     respawn2() {
-        if (isOutsideTop(this)) {
+        if (this.position.y < -20) {
             player2 = new Players(new Position(400, 520), playerSpeed, 20, player2Color)
-            player2life++
+            player2Score++
             
         }
     } 
     
 }
-function displayPlayer1lives() {
-    context.fillStyle = "white"
-    context.font = '40px serif';
-    context.fillText(player1life, 20, 50);
-}
-function displayPlayer2lives() {
-    context.fillStyle = "white"
-    context.font = '40px serif';
-    context.fillText(player2life, 560, 50);
-}
-
-function isOutsideTop(player1) {
-    return player1.position.y < -20;
-}
-
 
 let player1 = new Players(new Position(200, 520), playerSpeed, 20, player1Color)
 
 let player2 = new Players(new Position(400, 520), playerSpeed, 20, player2Color)
 
+class Enemy {
+    constructor(position, velocity) {
+        this.radius = generateNumberBetween(3,10);
+        this.color = "Wheat";
+        this.position = position;
+        this.velocity = velocity;
 
+    }
+
+    draw() {
+        context.beginPath()
+        context.fillStyle = this.color;
+        context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2)
+        context.fill();
+        context.closePath();
+
+    }
+}
+
+/* let enemy = new Enemy(generateEnemyPosition(), generateRandomVelocity()); */
+
+let enemies = [];
+
+function generateEnemyPosition() {
+    let side = generateNumberBetween(1, 2, false);
+
+    if (side === 1) { // vänster sida
+        return new Position(0, generateNumberBetween(0, canvas.height - 80, true));
+    } else if (side === 2) { // höger sida
+        return new Position(canvas.width, generateNumberBetween(0, canvas.height - 80, true));
+    } /* else if (side === 3) { // övre sidan
+        return new Position(generateNumberBetween(100, canvas.width, false), 0);
+    } else { // nedre sidan
+        return new Position(generateNumberBetween(100, canvas.width, true));
+    }
+} */
+}
+function handleEnemyMovement(enemy, deltaTime) {
+   
+    enemy.position.x += enemy.velocity.dx * deltaTime ;
+    
+  
+   
+}
+
+function generateRandomVelocity() {
+    return new Velocity(generateNumberBetween(-200, 200) );
+}
+
+function displayPlayer1Score() {
+    context.fillStyle = "Fuchsia"
+    context.font = '50px serif';
+    context.fillText(player1Score, 20, 50);
+}
+function displayPlayer2Score() {
+    context.fillStyle = "DeepSkyBlue"
+    context.font = '50px serif';
+    context.fillText(player2Score, 560, 50);
+}
+
+function generateNumberBetween(min, max) {
+/*     if (fraction) {
+        return Math.random() * (max - min) + min;
+    } else { */
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    
+}
 
 function handlePlayerMovement1(player1, deltaTime) {
     if (player1.keys.up && player1.position.y > 0 - player1.radius ) {
@@ -105,14 +158,6 @@ if (player2.keys.down && player2.position.y < canvas.height - player2.radius) {
 }
 }
 
-
-
-/*
-function player2life () {
-if(player2score) {
-   player1.y = 100;
-}
-}*/
 
 function player1KeyDown(event) {
     if (event.repeat) return;
@@ -166,7 +211,28 @@ window.addEventListener('keydown', player2KeyDown);
 window.addEventListener('keyup', player1KeyUp);
 window.addEventListener('keyup', player2KeyUp);
 
-  
+function circleCollision1(player1, enemy) {
+    let dx = player1.position.x - enemy.position.x;
+    let dy = player1.position.y - enemy.position.y;
+    let distance = Math.sqrt((dx * dx) + (dy * dy));
+
+    return distance < player1.radius + enemy.radius;
+}
+
+function circleCollision2(player2, enemy) {
+    let dx = player2.position.x - enemy.position.x;
+    let dy = player2.position.y - enemy.position.y;
+    let distance = Math.sqrt((dx * dx) + (dy * dy));
+
+    return distance < player2.radius + enemy.radius;
+}
+
+function isCircleOutside(enemy) {
+    return (enemy.position.x < -enemy.radius || 
+        enemy.position.x > canvas.width + enemy.radius || 
+        enemy.position.y < -enemy.radius || 
+        enemy.position.y > canvas.height + enemy.radius);
+    }
 
 let lastTick = Date.now();
 
@@ -177,8 +243,11 @@ function tick() {
     lastTick = currentTick;
 
     frameCount ++;
-
     context.clearRect(0, 0, canvas.width, canvas.height);
+   
+
+  
+    
 
   
     handlePlayerMovement1(player1, deltaTime);
@@ -187,30 +256,40 @@ function tick() {
     player2.draw();
     player1.respawn1();
     player2.respawn2()
-    displayPlayer1lives();
-    displayPlayer2lives();
-    //isCircleOutside(player1)
+    displayPlayer1Score();
+    displayPlayer2Score();
+
+    for (let i = 0; i < enemies.length; i++) {
+        let enemy = enemies[i];
+        enemy.draw()
+        handleEnemyMovement(enemy, deltaTime)
+        if (isCircleOutside(enemy)) {
+            enemies.splice(i, 1);
+            continue;
+        }
+        if (circleCollision1(enemy, player1)){
+          
+            player1 = new Players(new Position(200, 520), playerSpeed, 20, player1Color)
+            player1.draw()
+            
+        }
+        if (circleCollision2(enemy, player2)){
+          
+            player2 = new Players(new Position(400, 520), playerSpeed, 20, player2Color)
+            player2.draw()
+            
+        }
+    }
+    if (frameCount % 20 === 0) {
+        let enemy = new Enemy(generateEnemyPosition(canvas.width, canvas.height), generateRandomVelocity());
+        enemies.push(enemy);
+        enemy.draw();
+
+    
+    }
     requestAnimationFrame(tick)
     
 }
 
 tick();
 
-
-/*
-function isCircleOutside(player1) {
-    return (player1.position.y < -player1.radius || 
-        player1.position.y > canvas.height + player1.radius);
-
-    }
-*/
-
-
-    /*
-if (player1.position.y<player1.radius) {
-    new Player1();
-}
-else if (player2.position.y<player1.radius) {
-    new Player2();
-}
-*/
