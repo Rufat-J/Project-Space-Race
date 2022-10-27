@@ -6,7 +6,7 @@ let player2Score = 0;
 let nr = 0;
 
 //Game Settings
-let playerSpeed = 600;
+let playerSpeed = 220;
 let player1Color = "Fuchsia";
 let player2Color = "DeepSkyBlue";
 let shipImage;
@@ -20,14 +20,31 @@ class Entity {
     respawn2() {}
 }
 
-/* class Bullets {
-  constructor(position, speed) {
+class Bullets {
+  constructor(position, color, speed) {
     this.position = position,
     this.speed = speed,
-    this.radius = 10, 
-    this.color = "red"
+    this.radius = 5, 
+    this.color = color
+    this.keys = new Keys()
   }
-} */
+
+  drawBullet1() {
+   context.beginPath();
+   context.fillStyle = "Fuchsia";
+   context.arc(player1.position.x, player1.position.y, this.radius, 0, Math.PI * 2);
+   context.fill();
+   context.closePath(); 
+  }
+  
+  drawBullet2() {
+    context.beginPath();
+    context.fillStyle = "DeepSkyBlue";
+    context.arc(player2.position.x, player2.position.y, this.radius, 0, Math.PI * 2)
+    context.fill()
+    context.closePath()
+  }
+}
 
 class Players extends Entity {
   constructor(position, speed, radius, color, shipImage) {
@@ -80,8 +97,13 @@ class Players extends Entity {
 }
 
 let player1 = new Players(new Position(200, 515), playerSpeed, 40, shipImage);
-
 let player2 = new Players(new Position(400, 515), playerSpeed, 40, shipImage);
+let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y), 300)
+let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y), 20)
+
+
+
+
 
 class Enemy {
   constructor(position, velocity) {
@@ -161,6 +183,12 @@ function generateNumberBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function handleBullet1(bullet1, deltaTime) {
+  if (bullet1.keys.shoot) {
+    bullet1.position.x += bullet1.speed * deltaTime
+}
+}
+
 function handlePlayerMovement1(player1, deltaTime) {
   if (player1.keys.up && player1.position.y > 0 - player1.radius) {
     player1.position.y -= player1.speed * deltaTime;
@@ -179,10 +207,7 @@ function handlePlayerMovement2(player2, deltaTime) {
     player2.position.y -= player2.speed * deltaTime;
   }
 
-  if (
-    player2.keys.down &&
-    player2.position.y < canvas.height - player2.radius
-  ) {
+  if ( player2.keys.down && player2.position.y < canvas.height - player2.radius ) {
     player2.position.y += player2.speed * deltaTime;
   }
 }
@@ -194,18 +219,20 @@ function player1KeyDown(event) {
     player1.keys.up = true;
   } else if (event.key === "s" || event.key === "S") {
     player1.keys.down = true;
-  }
+  } else if (event.key === "e" || event.key === "E") {
+    bullet1.keys.shoot = true;
+   
+  } 
 }
 
 function player2KeyDown(event) {
   if (event.repeat) return;
-  event.preventDefault();
-  if (event.key === "p") {
-    event.preventDefault();
+  if (event.key === "p" || event.key === "P") {
     player2.keys.up = true;
-  } else if (event.key == "l") {
-    event.preventDefault();
+  } else if (event.key == "l" ||event.key === "L") {
     player2.keys.down = true;
+  } else if (event.key === "o" || event.key === "O") {
+    bullet2.keys.shoot = true;
   }
 }
 function player1KeyUp(event) {
@@ -213,16 +240,19 @@ function player1KeyUp(event) {
     player1.keys.up = false;
   } else if (event.key === "s" || event.key === "S") {
     player1.keys.down = false;
+  } else if (event.key === "e" || event.key === "E") {
+    bullet1.keys.shoot = false;
   }
 }
 
 function player2KeyUp(event) {
-  if (event.key == "p") {
+  if (event.key == "p" || event.key === "P") {
     player2.keys.up = false;
-  } else if (event.key == "l") {
-    event.preventDefault();
+  } else if (event.key == "l" || event.key === "L") {
     player2.keys.down = false;
-  }
+  } else if (event.key === "o" || event.key === "O") {
+    bullet2.keys.shoot = false;
+}
 }
 
 window.addEventListener("keydown", player1KeyDown);
@@ -273,11 +303,14 @@ function tick() {
   player2.respawn2();
   displayPlayer1Score();
   displayPlayer2Score();
+  bullet1.drawBullet1();
+  bullet2.drawBullet2();
 
   for (let i = 0; i < enemies.length; i++) {
     let enemy = enemies[i];
     enemy.draw();
     handleEnemyMovement(enemy, deltaTime);
+    handleBullet1(bullet1, deltaTime)
     if (isCircleOutside(enemy)) {
       enemies.splice(i, 1);
       continue;

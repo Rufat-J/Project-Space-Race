@@ -20,5 +20,6 @@ export class Keys {
     constructor() {
         this.up = false;
         this.down = false;
+        this.shoot = false;
     }
 }
