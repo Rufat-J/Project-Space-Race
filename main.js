@@ -3,9 +3,10 @@ import { canvas, context, Position, Keys, Velocity } from "./components.js";
 let frameCount = 10;
 let player1Score = 0;
 let player2Score = 0;
+let nr = 0;
 
 //Game Settings
-let playerSpeed = 200;
+let playerSpeed = 600;
 let player1Color = "Fuchsia";
 let player2Color = "DeepSkyBlue";
 let shipImage;
@@ -14,11 +15,19 @@ class Entity {
   constructor(position) {
     this.position = position;
   }
-
-  draw() {}
-  respawn1() {}
-  respawn2() {}
+    draw() {}
+    respawn1() {}
+    respawn2() {}
 }
+
+/* class Bullets {
+  constructor(position, speed) {
+    this.position = position,
+    this.speed = speed,
+    this.radius = 10, 
+    this.color = "red"
+  }
+} */
 
 class Players extends Entity {
   constructor(position, speed, radius, color, shipImage) {
@@ -32,22 +41,22 @@ class Players extends Entity {
 
   draw() {
     context.beginPath();
-    context.fillStyle = this.color;
-    //context.arc(370, this.position.y, this.radius, 0, Math.PI * 2);
-    context.drawImage(this.shipImage, this.position.x, this.position.y);
-    context.fill();
+    //context.fillStyle = this.color
+    context.drawImage(this.shipImage, this.position.x - 28, this.position.y - 26);
+    //context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
+    //context.fill();
     context.closePath();
   }
 
-  shipDisplay() {
-    ImageMode(CENTER);
-    image(this.shipImage, this.position.x, this.position.y, this.radius);
-  }
+  // shipDisplay() {
+  //   //ImageMode();
+  //   image(this.shipImage, this.position.x, this.position.y);
+  // }
 
   respawn1() {
     if (this.position.y < -20) {
       player1 = new Players(
-        new Position(150, 520),
+        new Position(200, 515),
         playerSpeed,
         20,
         player1Color,
@@ -60,7 +69,7 @@ class Players extends Entity {
   respawn2() {
     if (this.position.y < -20) {
       player2 = new Players(
-        new Position(400, 520),
+        new Position(400, 515),
         playerSpeed,
         20,
         player2Color
@@ -70,9 +79,9 @@ class Players extends Entity {
   }
 }
 
-let player1 = new Players(new Position(200, 520), playerSpeed, 20, shipImage);
+let player1 = new Players(new Position(200, 515), playerSpeed, 40, shipImage);
 
-let player2 = new Players(new Position(400, 520), playerSpeed, 20, shipImage);
+let player2 = new Players(new Position(400, 515), playerSpeed, 40, shipImage);
 
 class Enemy {
   constructor(position, velocity) {
@@ -96,16 +105,16 @@ class Enemy {
 let enemies = [];
 
 function generateEnemyPosition() {
-  let side = generateNumberBetween(1, 2, false);
+  let side = generateNumberBetween(1, 2);
 
   if (side === 1) {
     // vänster sida
-    return new Position(0, generateNumberBetween(0, canvas.height - 80, true));
+    return new Position(0, generateNumberBetween(0, canvas.height - 80));
   } else if (side === 2) {
     // höger sida
     return new Position(
       canvas.width,
-      generateNumberBetween(0, canvas.height - 80, true)
+      generateNumberBetween(0, canvas.height - 80)
     );
   } /* else if (side === 3) { // övre sidan
         return new Position(generateNumberBetween(100, canvas.width, false), 0);
@@ -118,8 +127,20 @@ function handleEnemyMovement(enemy, deltaTime) {
   enemy.position.x += enemy.velocity.dx * deltaTime;
 }
 
+
+function newVelocity() {
+  let newVel = generateNumberBetween(1,2)
+  if ( newVel === 1) {
+   nr = -200    
+  }  else {
+  nr = 200
+  }
+  return nr;
+
+}
+
 function generateRandomVelocity() {
-  return new Velocity(generateNumberBetween(-200, 200));
+  return new Velocity(newVelocity());
 }
 
 function displayPlayer1Score() {
@@ -130,7 +151,7 @@ function displayPlayer1Score() {
 function displayPlayer2Score() {
   context.fillStyle = "DeepSkyBlue";
   context.font = "50px serif";
-  context.fillText(player2Score, 560, 50);
+  context.fillText(player2Score, 530, 50);
 }
 
 function generateNumberBetween(min, max) {
@@ -179,10 +200,10 @@ function player1KeyDown(event) {
 function player2KeyDown(event) {
   if (event.repeat) return;
   event.preventDefault();
-  if (event.key === "ArrowUp") {
+  if (event.key === "p") {
     event.preventDefault();
     player2.keys.up = true;
-  } else if (event.key == "ArrowDown") {
+  } else if (event.key == "l") {
     event.preventDefault();
     player2.keys.down = true;
   }
@@ -196,9 +217,9 @@ function player1KeyUp(event) {
 }
 
 function player2KeyUp(event) {
-  if (event.key == "ArrowUp") {
+  if (event.key == "p") {
     player2.keys.up = false;
-  } else if (event.key == "ArrowDown") {
+  } else if (event.key == "l") {
     event.preventDefault();
     player2.keys.down = false;
   }
@@ -263,16 +284,15 @@ function tick() {
     }
     if (circleCollision1(enemy, player1)) {
       player1 = new Players(
-        new Position(200, 520),
+        new Position(200, 515),
         playerSpeed,
-        20,
-        player1Color
+        20
       );
       player1.draw();
     }
     if (circleCollision2(enemy, player2)) {
       player2 = new Players(
-        new Position(400, 520),
+        new Position(400, 515),
         playerSpeed,
         20,
         player2Color
