@@ -1,12 +1,14 @@
 import { canvas, context, Position, Keys, Velocity } from "./components.js";
 
-let frameCount = 10;
+let frameCount = 40;
 let player1Score = 0;
 let player2Score = 0;
 let nr = 0;
-
+let enemies = [];
+let bulletDelay1 = 0;
+let bulletDelay2 = 0;
 //Game Settings
-let playerSpeed = 220;
+let playerSpeed = 100;
 let player1Color = "Fuchsia";
 let player2Color = "DeepSkyBlue";
 let shipImage;
@@ -23,7 +25,7 @@ class Entity {
 class Bullets {
   constructor(position, color, speed) {
     this.position = position,
-    this.speed = speed,
+    this.speed = 200,
     this.radius = 5, 
     this.color = color
     this.keys = new Keys()
@@ -32,7 +34,7 @@ class Bullets {
   drawBullet1() {
    context.beginPath();
    context.fillStyle = "Fuchsia";
-   context.arc(player1.position.x, player1.position.y, this.radius, 0, Math.PI * 2);
+   context.arc(this.position.x, player1.position.y, this.radius, 0, Math.PI * 2);
    context.fill();
    context.closePath(); 
   }
@@ -40,11 +42,40 @@ class Bullets {
   drawBullet2() {
     context.beginPath();
     context.fillStyle = "DeepSkyBlue";
-    context.arc(player2.position.x, player2.position.y, this.radius, 0, Math.PI * 2)
+    context.arc(this.position.x, player2.position.y, this.radius, 0, Math.PI * 2)
     context.fill()
     context.closePath()
   }
+
+  handleBullet1(bullet1, deltaTime) {
+    if (bullet1.keys.shoot) {
+      //bullet1.position.y =+ 200;
+      bullet1.position.x += this.speed * deltaTime
+      bullet1.position.y =+ player1.position.y
+      bulletDelay1=0;
+      console.log("Bullet1 position ", bullet1.position.y )
+  }
+     if (bullet1.position.x > canvas.width && bulletDelay1 === 300) {
+     bullet1.position.x = player1.position.x
+   
+  }
+  }
+
+  handleBullet2(bullet2, deltaTime) {
+    if (bullet2.keys.shoot) {
+
+      bullet2.position.x -= 100 * deltaTime
+      bulletDelay2 = 0;
+      console.log("Bullet2 position ", bullet2.position.y )
+    }
+    if (bullet2.position.x <= 0 && bulletDelay2 === 300) {
+      bullet2.position.x = player2.position.x
+    }
+  }
 }
+
+
+
 
 class Players extends Entity {
   constructor(position, speed, radius, color, shipImage) {
@@ -58,51 +89,27 @@ class Players extends Entity {
 
   draw() {
     context.beginPath();
-    //context.fillStyle = this.color
     context.drawImage(this.shipImage, this.position.x - 28, this.position.y - 26);
-    //context.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-    //context.fill();
     context.closePath();
   }
 
-  // shipDisplay() {
-  //   //ImageMode();
-  //   image(this.shipImage, this.position.x, this.position.y);
-  // }
-
   respawn1() {
-    if (this.position.y < -20) {
-      player1 = new Players(
-        new Position(200, 515),
-        playerSpeed,
-        20,
-        player1Color,
-        this.image
-      );
-      player1Score++;
-    }
+    //if (this.position.y < -20) {
+      player1 = new Players(new Position(200, 515), playerSpeed, 20, player1Color);
+    //}
   }
 
   respawn2() {
-    if (this.position.y < -20) {
-      player2 = new Players(
-        new Position(400, 515),
-        playerSpeed,
-        20,
-        player2Color
-      );
-      player2Score++;
+    //if (this.position.y < -20) {
+      player2 = new Players(new Position(400, 515), playerSpeed, 20, player2Color);
     }
   }
-}
+
 
 let player1 = new Players(new Position(200, 515), playerSpeed, 40, shipImage);
 let player2 = new Players(new Position(400, 515), playerSpeed, 40, shipImage);
-let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y), 300)
-let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y), 20)
-
-
-
+let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y))
+let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y))
 
 
 class Enemy {
@@ -121,10 +128,6 @@ class Enemy {
     context.closePath();
   }
 }
-
-/* let enemy = new Enemy(generateEnemyPosition(), generateRandomVelocity()); */
-
-let enemies = [];
 
 function generateEnemyPosition() {
   let side = generateNumberBetween(1, 2);
@@ -183,11 +186,7 @@ function generateNumberBetween(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-function handleBullet1(bullet1, deltaTime) {
-  if (bullet1.keys.shoot) {
-    bullet1.position.x += bullet1.speed * deltaTime
-}
-}
+
 
 function handlePlayerMovement1(player1, deltaTime) {
   if (player1.keys.up && player1.position.y > 0 - player1.radius) {
@@ -221,6 +220,7 @@ function player1KeyDown(event) {
     player1.keys.down = true;
   } else if (event.key === "e" || event.key === "E") {
     bullet1.keys.shoot = true;
+    
    
   } 
 }
@@ -260,12 +260,20 @@ window.addEventListener("keydown", player2KeyDown);
 window.addEventListener("keyup", player1KeyUp);
 window.addEventListener("keyup", player2KeyUp);
 
+function bulletCollision1(player2, bullet1) {
+  let dx = player2.position.x - bullet1.position.x;
+  let dy = player2.position.y - bullet1.position.y;
+  let distance = Math.sqrt(dx * dx + dy * dy);
+  return distance < player2.radius + bullet1.radius; 
+}
+
 function circleCollision1(player1, enemy) {
+  
   let dx = player1.position.x - enemy.position.x;
   let dy = player1.position.y - enemy.position.y;
   let distance = Math.sqrt(dx * dx + dy * dy);
-
   return distance < player1.radius + enemy.radius;
+   
 }
 
 function circleCollision2(player2, enemy) {
@@ -291,7 +299,16 @@ function tick() {
   let currentTick = Date.now();
   let deltaTime = (currentTick - lastTick) / 1000;
   lastTick = currentTick;
+  bulletDelay1++
+  bulletDelay2++
 
+  if (bulletDelay1 > 301) {
+    bulletDelay1 = 300
+  }
+  if (bulletDelay2 > 301) {
+    bulletDelay2 = 300
+    console.log(bulletDelay2);
+  }
   frameCount++;
   context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -299,40 +316,57 @@ function tick() {
   handlePlayerMovement2(player2, deltaTime);
   player1.draw();
   player2.draw();
+
+  if (player1.position.y < -20) {
   player1.respawn1();
+  player1Score++;
+  }
+  if(player2.position.y < -20) {
   player2.respawn2();
+  player2Score++;
+  }
   displayPlayer1Score();
   displayPlayer2Score();
-  bullet1.drawBullet1();
-  bullet2.drawBullet2();
+ 
+   //bullet1.drawBullet1();
+   //bullet2.drawBullet2();
 
   for (let i = 0; i < enemies.length; i++) {
     let enemy = enemies[i];
     enemy.draw();
     handleEnemyMovement(enemy, deltaTime);
-    handleBullet1(bullet1, deltaTime)
+
     if (isCircleOutside(enemy)) {
       enemies.splice(i, 1);
       continue;
-    }
+    }  
     if (circleCollision1(enemy, player1)) {
-      player1 = new Players(
-        new Position(200, 515),
-        playerSpeed,
-        20
-      );
+      player1.respawn1()
       player1.draw();
     }
     if (circleCollision2(enemy, player2)) {
-      player2 = new Players(
-        new Position(400, 515),
-        playerSpeed,
-        20,
-        player2Color
-      );
+      player2.respawn2()
       player2.draw();
     }
   }
+
+  for(let i = -10; i < frameCount; i++) {
+  bullet1.handleBullet1(bullet1, deltaTime)
+  bullet1.handleBullet2(bullet2, deltaTime)
+  bullet1.drawBullet1()
+  bullet2.drawBullet2()
+  if (frameCount > 2000) {
+    frameCount = 0;
+    i= -10;
+  }
+  }
+
+  if(bulletCollision1(bullet1, player2)){
+    player2.respawn2()
+    console.log("Collide")
+   
+  }
+
   if (frameCount % 20 === 0) {
     let enemy = new Enemy(
       generateEnemyPosition(canvas.width, canvas.height),
