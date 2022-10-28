@@ -7,6 +7,7 @@ let nr = 0;
 let enemies = [];
 let bulletDelay1 = 0;
 let bulletDelay2 = 0;
+
 //Game Settings
 let playerSpeed = 100;
 let player1Color = "Fuchsia";
@@ -53,7 +54,7 @@ class Bullets {
       bullet1.position.x += this.speed * deltaTime
       bullet1.position.y =+ player1.position.y
       bulletDelay1=0;
-      console.log("Bullet1 position ", bullet1.position.y )
+     
   }
      if (bullet1.position.x > canvas.width && bulletDelay1 === 300) {
      bullet1.position.x = player1.position.x
@@ -64,9 +65,10 @@ class Bullets {
   handleBullet2(bullet2, deltaTime) {
     if (bullet2.keys.shoot) {
 
-      bullet2.position.x -= 100 * deltaTime
+      bullet2.position.x -= this.speed * deltaTime
+      bullet2.position.y =+ player2.position.y
       bulletDelay2 = 0;
-      console.log("Bullet2 position ", bullet2.position.y )
+    
     }
     if (bullet2.position.x <= 0 && bulletDelay2 === 300) {
       bullet2.position.x = player2.position.x
@@ -94,20 +96,17 @@ class Players extends Entity {
   }
 
   respawn1() {
-    //if (this.position.y < -20) {
       player1 = new Players(new Position(200, 515), playerSpeed, 20, player1Color);
-    //}
   }
 
   respawn2() {
-    //if (this.position.y < -20) {
       player2 = new Players(new Position(400, 515), playerSpeed, 20, player2Color);
     }
   }
 
 
-let player1 = new Players(new Position(200, 515), playerSpeed, 40, shipImage);
-let player2 = new Players(new Position(400, 515), playerSpeed, 40, shipImage);
+let player1 = new Players(new Position(200, 515), playerSpeed, 20, shipImage);
+let player2 = new Players(new Position(400, 515), playerSpeed, 20, shipImage);
 let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y))
 let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y))
 
@@ -141,17 +140,12 @@ function generateEnemyPosition() {
       canvas.width,
       generateNumberBetween(0, canvas.height - 80)
     );
-  } /* else if (side === 3) { // övre sidan
-        return new Position(generateNumberBetween(100, canvas.width, false), 0);
-    } else { // nedre sidan
-        return new Position(generateNumberBetween(100, canvas.width, true));
-    }
-} */
+  }
 }
+
 function handleEnemyMovement(enemy, deltaTime) {
   enemy.position.x += enemy.velocity.dx * deltaTime;
 }
-
 
 function newVelocity() {
   let newVel = generateNumberBetween(1,2)
@@ -176,17 +170,12 @@ function displayPlayer1Score() {
 function displayPlayer2Score() {
   context.fillStyle = "DeepSkyBlue";
   context.font = "50px serif";
-  context.fillText(player2Score, 530, 50);
+  context.fillText(player2Score, 540, 50);
 }
 
 function generateNumberBetween(min, max) {
-  /*     if (fraction) {
-        return Math.random() * (max - min) + min;
-    } else { */
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
-
 
 function handlePlayerMovement1(player1, deltaTime) {
   if (player1.keys.up && player1.position.y > 0 - player1.radius) {
@@ -220,8 +209,6 @@ function player1KeyDown(event) {
     player1.keys.down = true;
   } else if (event.key === "e" || event.key === "E") {
     bullet1.keys.shoot = true;
-    
-   
   } 
 }
 
@@ -235,6 +222,7 @@ function player2KeyDown(event) {
     bullet2.keys.shoot = true;
   }
 }
+
 function player1KeyUp(event) {
   if (event.key === "w" || event.key === "W") {
     player1.keys.up = false;
@@ -252,7 +240,7 @@ function player2KeyUp(event) {
     player2.keys.down = false;
   } else if (event.key === "o" || event.key === "O") {
     bullet2.keys.shoot = false;
-}
+  }
 }
 
 window.addEventListener("keydown", player1KeyDown);
@@ -265,6 +253,13 @@ function bulletCollision1(player2, bullet1) {
   let dy = player2.position.y - bullet1.position.y;
   let distance = Math.sqrt(dx * dx + dy * dy);
   return distance < player2.radius + bullet1.radius; 
+}
+
+function bulletCollision2(player1, bullet2) {
+  let dx = player1.position.x - bullet2.position.x;
+  let dy = player1.position.y - bullet2.position.y;
+  let distance = Math.sqrt(dx * dx + dy * dy);
+  return distance < player1.radius + bullet2.radius;
 }
 
 function circleCollision1(player1, enemy) {
@@ -307,7 +302,7 @@ function tick() {
   }
   if (bulletDelay2 > 301) {
     bulletDelay2 = 300
-    console.log(bulletDelay2);
+    
   }
   frameCount++;
   context.clearRect(0, 0, canvas.width, canvas.height);
@@ -355,19 +350,22 @@ function tick() {
   bullet1.handleBullet2(bullet2, deltaTime)
   bullet1.drawBullet1()
   bullet2.drawBullet2()
+
+  if(bulletCollision1(bullet1, player2)){
+    player2.respawn2()  
+  }
+
+  if(bulletCollision2(bullet2, player1)) {
+    player1.respawn1()
+  }
+
   if (frameCount > 2000) {
     frameCount = 0;
     i= -10;
-  }
-  }
-
-  if(bulletCollision1(bullet1, player2)){
-    player2.respawn2()
-    console.log("Collide")
-   
+    }
   }
 
-  if (frameCount % 20 === 0) {
+  if (frameCount % 15 === 0) {
     let enemy = new Enemy(
       generateEnemyPosition(canvas.width, canvas.height),
       generateRandomVelocity()
@@ -375,6 +373,7 @@ function tick() {
     enemies.push(enemy);
     enemy.draw();
   }
+
   requestAnimationFrame(tick);
 }
 
