@@ -24,12 +24,10 @@ class Entity {
 }
 
 class Bullets {
-  constructor(position, color, speed) {
-    
+  constructor(position, velocity) {
     this.position = position,
-    this.speed = 200,
-    this.radius = 5, 
-    this.color = color
+    this.velocity = velocity;
+    this.radius = 5,
     this.keys = new Keys()
   }
 
@@ -52,7 +50,8 @@ class Bullets {
   handleBullet1(bullet1, deltaTime) {
     if (bullet1.keys.shoot) {
       //bullet1.position.y =+ 200;
-      bullet1.position.x += this.speed * deltaTime
+      
+      bullet1.position.x += bullet1.velocity.dx * deltaTime
       bullet1.position.y =+ player1.position.y
       bulletDelay1=0;
      
@@ -66,8 +65,8 @@ class Bullets {
   handleBullet2(bullet2, deltaTime) {
     if (bullet2.keys.shoot) {
 
-      bullet2.position.x -= this.speed * deltaTime
-      bullet2.position.y =+ player2.position.y
+      bullet2.position.x -= bullet1.velocity.dx * deltaTime
+      bullet2.position.y =+ player2.position.y 
       bulletDelay2 = 0;
     
     }
@@ -106,8 +105,8 @@ class Players extends Entity {
 
 let player1 = new Players(new Position(200, 515), playerSpeed, 20, shipImage);
 let player2 = new Players(new Position(400, 515), playerSpeed, 20, shipImage);
-let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y) )
-let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y) )
+let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y), new Velocity(100))
+let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y), new Velocity(100) )
 
 
 class Enemy {
@@ -143,7 +142,6 @@ function generateEnemyPosition() {
    enemies.push(enemy);
    
   }
-
 }
 
 function handleEnemyMovement(enemy, deltaTime) {
@@ -296,7 +294,6 @@ function tick() {
   }
   frameCount++;
   context.clearRect(0, 0, canvas.width, canvas.height);
-  console.log(bullet1.position)
   handlePlayerMovement1(player1, deltaTime);
   handlePlayerMovement2(player2, deltaTime);
   player1.draw();
@@ -335,6 +332,7 @@ function tick() {
   }
 
   for(let i = -10; i < frameCount; i++) {
+
   bullet1.handleBullet1(bullet1, deltaTime)
   bullet1.handleBullet2(bullet2, deltaTime)
   bullet1.drawBullet1()
@@ -348,17 +346,17 @@ function tick() {
     player1.respawn1()
   }
 
+  }
   if (frameCount > 2000) {
     frameCount = 0;
-    i= -10;
     }
-  }
+  
 
   if (frameCount % 25 === 0) {
- 
-     generateEnemyPosition()
-
+    generateEnemyPosition()
   }
+
+
 
   requestAnimationFrame(tick);
 }
