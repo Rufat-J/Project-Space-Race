@@ -3,10 +3,10 @@ import { canvas, context, Position, Keys, Velocity } from "./components.js";
 let frameCount = 40;
 let player1Score = 0;
 let player2Score = 0;
-let nr = 0;
 let enemies = [];
 let bulletDelay1 = 0;
 let bulletDelay2 = 0;
+let side = 0;
 
 //Game Settings
 let playerSpeed = 100;
@@ -25,6 +25,7 @@ class Entity {
 
 class Bullets {
   constructor(position, color, speed) {
+    
     this.position = position,
     this.speed = 200,
     this.radius = 5, 
@@ -77,8 +78,6 @@ class Bullets {
 }
 
 
-
-
 class Players extends Entity {
   constructor(position, speed, radius, color, shipImage) {
     super(position);
@@ -107,8 +106,8 @@ class Players extends Entity {
 
 let player1 = new Players(new Position(200, 515), playerSpeed, 20, shipImage);
 let player2 = new Players(new Position(400, 515), playerSpeed, 20, shipImage);
-let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y))
-let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y))
+let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y) )
+let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y) )
 
 
 class Enemy {
@@ -129,38 +128,29 @@ class Enemy {
 }
 
 function generateEnemyPosition() {
-  let side = generateNumberBetween(1, 2);
-
-  if (side === 1) {
-    // vänster sida
-    return new Position(0, generateNumberBetween(0, canvas.height - 80));
-  } else if (side === 2) {
-    // höger sida
-    return new Position(
-      canvas.width,
-      generateNumberBetween(0, canvas.height - 80)
-    );
+  
+  side = generateNumberBetween(1, 2);
+  
+  if(side === 1) {                                      
+   let enemy = new Enemy(new Position(0, generateNumberBetween(0, canvas.height - 80)), new Velocity(100))
+   enemy.draw();  
+   enemies.push(enemy);
+   
   }
+  else if(side === 2) {
+   let enemy = new Enemy(new Position(canvas.width, generateNumberBetween(0, canvas.height -80)), new Velocity(-100))
+   enemy.draw();
+   enemies.push(enemy);
+   
+  }
+
 }
 
 function handleEnemyMovement(enemy, deltaTime) {
   enemy.position.x += enemy.velocity.dx * deltaTime;
 }
 
-function newVelocity() {
-  let newVel = generateNumberBetween(1,2)
-  if ( newVel === 1) {
-   nr = -200    
-  }  else {
-  nr = 200
-  }
-  return nr;
 
-}
-
-function generateRandomVelocity() {
-  return new Velocity(newVelocity());
-}
 
 function displayPlayer1Score() {
   context.fillStyle = "Fuchsia";
@@ -306,7 +296,7 @@ function tick() {
   }
   frameCount++;
   context.clearRect(0, 0, canvas.width, canvas.height);
-
+  console.log(bullet1.position)
   handlePlayerMovement1(player1, deltaTime);
   handlePlayerMovement2(player2, deltaTime);
   player1.draw();
@@ -323,17 +313,16 @@ function tick() {
   displayPlayer1Score();
   displayPlayer2Score();
  
-   //bullet1.drawBullet1();
-   //bullet2.drawBullet2();
 
   for (let i = 0; i < enemies.length; i++) {
     let enemy = enemies[i];
     enemy.draw();
     handleEnemyMovement(enemy, deltaTime);
+    
 
     if (isCircleOutside(enemy)) {
-      enemies.splice(i, 1);
-      continue;
+      enemies.splice(i, 1)
+      
     }  
     if (circleCollision1(enemy, player1)) {
       player1.respawn1()
@@ -365,13 +354,10 @@ function tick() {
     }
   }
 
-  if (frameCount % 15 === 0) {
-    let enemy = new Enemy(
-      generateEnemyPosition(canvas.width, canvas.height),
-      generateRandomVelocity()
-    );
-    enemies.push(enemy);
-    enemy.draw();
+  if (frameCount % 25 === 0) {
+ 
+     generateEnemyPosition()
+
   }
 
   requestAnimationFrame(tick);
