@@ -1,6 +1,19 @@
 export const canvas = document.getElementById("canvas");
 export const context = canvas.getContext("2d");
 
+export class Entity {
+    constructor(position, radius) {
+      this.position = position;
+      this.radius = radius;
+  
+    }
+      draw1() {}
+      draw2() {}
+      
+      respawn1() {}
+      respawn2() {}
+      handleMovement() {}
+  }
 
 export class Position {
     constructor (x, y) {
