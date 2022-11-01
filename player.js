@@ -13,7 +13,7 @@ export class Players extends Entity {
       this.shipImage = document.getElementById("shipImage");
     }
   
-    draw1() {
+    draw() {
       context.beginPath();
       context.drawImage(this.shipImage, this.position.x - 28, this.position.y - 26);
       context.closePath();

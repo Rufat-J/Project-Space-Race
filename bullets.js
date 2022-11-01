@@ -11,22 +11,19 @@ export class Bullets extends Entity {
       this.keys = new Keys()
     }
   
-    draw1() {
+    draw() {
      context.beginPath();
      context.fillStyle = "Fuchsia";
-     context.arc(this.position.x, player1.position.y, this.radius, 0, Math.PI * 2);
+     context.arc(bullet1.position.x, player1.position.y, this.radius, 0, Math.PI * 2);
+     context.fill()
+     context.closePath()
+     context.beginPath()
+     context.fillStyle  = "DeepSkyBlue";
+     context.arc(bullet2.position.x, player2.position.y, this.radius, 0, Math.PI * 2)
      context.fill();
      context.closePath(); 
     }
     
-    draw2() {
-      context.beginPath();
-      context.fillStyle = "DeepSkyBlue";
-      context.arc(this.position.x, player2.position.y, this.radius, 0, Math.PI * 2)
-      context.fill()
-      context.closePath()
-    }
-
     handleMovement(bullet1, bullet2, deltaTime) {
       if (bullet1.keys.shoot) {
         
@@ -83,8 +80,9 @@ export class Bullets extends Entity {
     for(let i = -10; i < frameCount; i++) {
   
       bullet1.handleMovement(bullet1, bullet2, deltaTime)
-      bullet1.draw1()
-      bullet2.draw2()
+      bullet1.draw()
+      bullet2.draw()
+
     
       if(bulletCollision1(bullet1, player2)){
         player2.respawn2()  
@@ -96,7 +94,5 @@ export class Bullets extends Entity {
       }
   }
 
-
-  
   export let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y), 5, new Velocity(100))
   export let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y), 5, new Velocity(100))
