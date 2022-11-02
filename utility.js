@@ -19,18 +19,20 @@ export function generateNumberBetween(min, max) {
    
     let dx = player1.position.x - enemy.position.x;
     let dy = player1.position.y - enemy.position.y;
-    let distance = Math.sqrt(dx * dx + dy * dy);
+    let distance = Math.sqrt(dx * dx + dy * dy); // distance 1
         
     let zx = player2.position.x - enemy.position.x;
     let zy = player2.position.y - enemy.position.y;
-    let distance2 = Math.sqrt(zx * zx + zy * zy);
+    let distance2 = Math.sqrt(zx * zx + zy * zy); // distance 2
      if( distance < player1.radius + enemy.radius) {
         //return distance; 
+        //player1.respawn1()
         player1.respawn1()
         player1.draw();
      }
     else if (distance2 < player2.radius + enemy.radius) {
      //return distance2;
+     //player2.respawn1()
      player2.respawn2()
      player2.draw();
 }

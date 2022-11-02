@@ -18,14 +18,16 @@ export class Players extends Entity {
       context.drawImage(this.shipImage, this.position.x - 28, this.position.y - 26);
       context.closePath();
     }
-  
+
     respawn1() {
-        player1 = new Players(new Position(200, 515), playerSpeed, 20);
+
+      player1 = new Players(new Position(200, 515), playerSpeed, 20)
     }
-  
+
     respawn2() {
-        player2 = new Players(new Position(400, 515), playerSpeed, 20);
-      }
+      player2 = new Players(new Position(400, 515), playerSpeed, 20);
+    }
+    
   
     handleMovement(player2, deltaTime) {
         if (this.keys.up && this.position.y > 0 - this.radius) {

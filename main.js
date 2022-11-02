@@ -30,11 +30,11 @@ function tick() {
   bullet1.bulletDelayLimit();
   startGame(deltaTime)
   frameCount++;
-  enemy.respawn1(deltaTime)
+  enemy.respawn(deltaTime)
   bulletControl(deltaTime, frameCount)
  
   // detta är för att resetta framecount så att det inte laggar.
-  if (frameCount > 2000) {
+  if (frameCount > 500) {
     frameCount = 0;
     }
   

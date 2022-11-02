@@ -7,9 +7,7 @@ export class Entity {
       this.radius = radius;
   
     }
-      draw1() {}
-      draw2() {}
-      
+      draw() {}
       respawn1() {}
       respawn2() {}
       handleMovement() {}

@@ -62,19 +62,26 @@ export class Bullets extends Entity {
         }
   }
   
-  function bulletCollision1(player2, bullet1) {
+  function bulletCollision() {
     let dx = player2.position.x - bullet1.position.x;
     let dy = player2.position.y - bullet1.position.y;
-    let distance = Math.sqrt(dx * dx + dy * dy);
-    return distance < player2.radius + bullet1.radius; 
+    let distance = Math.sqrt(dx * dx + dy * dy); // distance 3
+    
+    let zx = player1.position.x - bullet2.position.x;
+    let zy = player1.position.y - bullet2.position.y;
+    let distance2 = Math.sqrt(zx * zx + zy * zy); // distance 4
+    
+    if (distance < player2.radius + bullet1.radius) {
+      player2.draw()
+      //player2.respawn1()
+      player2.respawn2()
+    }
+    else if (distance2 < player1.radius + bullet2.radius) {
+      player1.draw()
+      //player1.respawn1()
+      player1.respawn1()
   }
-  
-   function bulletCollision2(player1, bullet2) {
-    let dx = player1.position.x - bullet2.position.x;
-    let dy = player1.position.y - bullet2.position.y;
-    let distance = Math.sqrt(dx * dx + dy * dy);
-    return distance < player1.radius + bullet2.radius;
-  }
+}
   
   export function bulletControl(deltaTime, frameCount) {
     for(let i = -10; i < frameCount; i++) {
@@ -82,17 +89,9 @@ export class Bullets extends Entity {
       bullet1.handleMovement(bullet1, bullet2, deltaTime)
       bullet1.draw()
       bullet2.draw()
-
-    
-      if(bulletCollision1(bullet1, player2)){
-        player2.respawn2()  
-      }
-    
-      if(bulletCollision2(bullet2, player1)) {
-        player1.respawn1()
-      }
-      }
+      bulletCollision() 
   }
+}
 
   export let bullet1 = new Bullets(new Position(player1.position.x, player1.position.y), 5, new Velocity(100))
   export let bullet2 = new Bullets(new Position(player2.position.x, player2.position.y), 5, new Velocity(100))
