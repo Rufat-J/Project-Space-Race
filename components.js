@@ -3,25 +3,23 @@ export const context = canvas.getContext("2d");
 
 export class Entity {
     constructor(position, radius) {
-      this.position = position;
-      this.radius = radius;
-  
+        this.position = position;
+        this.radius = radius;
     }
-      draw() {}
-      respawn1() {}
-      respawn2() {}
-      handleMovement() {}
-  }
+
+    draw() { }
+    handleMovement() { }
+}
 
 export class Position {
-    constructor (x, y) {
+    constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 }
 
 export class Velocity {
-    constructor (dx, dy) {
+    constructor(dx, dy) {
         this.dx = dx;
         this.dy = dy;
     }
